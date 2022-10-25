@@ -1,8 +1,8 @@
 /*
  * @Author: wxxyanmei 736692897@qq.com
  * @Date: 2022-10-22 16:04:08
- * @LastEditors: wxxyanmei 736692897@qq.com
- * @LastEditTime: 2022-10-22 16:41:15
+ * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2022-10-25 16:52:32
  * @FilePath: \vue设计与实现\proxy4.0.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -18,6 +18,7 @@ const effectStack = [] //effect栈
 
 function effect(fn) {
     const effectFn = () => {
+        cleanup(effectFn)
         activeEffect = effectFn
         fn()
     }
@@ -69,6 +70,11 @@ const trigger = (target, key) =>{
     const depsMap = bucket.get(target)
     if (!depsMap) return
     const effects = depsMap.get(key)
-    const effectToRun = new Set(effects)
-    effectToRun.forEach(effects => effects())
+    const effectToRun = new Set()
+    effects && effects.forEach(effect => {
+        if (effect !== activeEffect) {
+            effectToRun.add(effect)
+        }
+    })
+    effectToRun.forEach(effect => effect())
 }
